@@ -52,34 +52,62 @@ export class SceneManager {
     this.buildings.forEach((b) => b.addToScene(this.scene));
     Building.addVegetationToScene(this.scene);
 
-    // ========== DRONE — diam di tengah kota ==========
+    // ========== DRONE — di tengah kota ==========
     this.drone = this._createDrone();
-    // Hitung pusat grid kota
-    const centerX = (gridCols * cellSize) / 2;
-    const centerZ = (gridRows * cellSize) / 2;
-    const droneY = 22;
-    // Tempatkan drone diam di tengah, sedikit di atas atap gedung
-    this.drone.position.set(centerX, droneY, centerZ);
+    this.droneAltitude = 7;  // Mid-building level — terbang DI ANTARA gedung
+    // Pusat grid dalam world coordinates
+    const centerX = this.grid.offsetX + (gridCols * cellSize) / 2;
+    const centerZ = this.grid.offsetZ + (gridRows * cellSize) / 2;
+    this.drone.position.set(centerX, this.droneAltitude, centerZ);
     this.scene.add(this.drone);
 
-    // Posisi awal kamera: dari belakang-atas, menghadap tepat ke drone
-    // Sehingga drone tepat di tengah layar saat pertama kali dibuka
-    this.camera.position.set(centerX, droneY + 35, centerZ + 45);
-    this.camera.lookAt(centerX, droneY, centerZ);
+    // Posisi awal kamera: dari belakang-atas, menghadap ke drone
+    this.camera.position.set(centerX, this.droneAltitude + 30, centerZ + 40);
+    this.camera.lookAt(centerX, this.droneAltitude, centerZ);
 
     // ========== RENDERER ==========
     this.renderer = this._createRenderer();
 
-    // ========== ORBIT CONTROLS — kamera bebas tanpa mempengaruhi drone ==========
+    // ========== ORBIT CONTROLS — right-click rotate (left-click untuk pathfinding) ==========
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.target.set(centerX, droneY, centerZ); // Orbit mengelilingi drone
-    this.controls.enableDamping = true; // Gerakan kamera halus
-    this.controls.dampingFactor = 0.08;
-    this.controls.screenSpacePanning = false; // Pan mengikuti bidang horizontal
-    this.controls.minDistance = 5; // Tidak terlalu dekat
-    this.controls.maxDistance = 400; // Tidak terlalu jauh
-    this.controls.maxPolarAngle = Math.PI / 2 + 0.1; // Sedikit di bawah horizon
+    this.controls.target.set(centerX, this.droneAltitude, centerZ);
+
+    this.controls.enableZoom   = true;
+    this.controls.zoomSpeed    = 1.5;
+
+    this.controls.enablePan    = true;
+    this.controls.panSpeed     = 1.2;
+
+    // RIGHT-CLICK untuk orbit — left-click bebas untuk InputSystem pathfinding
+    this.controls.mouseButtons = {
+      LEFT:   null,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT:  THREE.MOUSE.ROTATE,
+    };
+    this.controls.enableRotate = true;
+    this.controls.rotateSpeed  = 0.8;
+
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor  = 0.08;
+
+    this.controls.screenSpacePanning = true;
+
+    this.controls.minDistance = 3;
+    this.controls.maxDistance = 500;
+
+    this.controls.minPolarAngle = 0;
+    this.controls.maxPolarAngle = Math.PI / 2 + 0.15;
+
+    this.controls.touches = {
+      ONE:  THREE.TOUCH.PAN,       // 1 jari = pan (bukan rotate, biar gak konflik)
+      TWO:  THREE.TOUCH.DOLLY_PAN,
+    };
+
+    // Cegah context menu pada right-click
+    this.renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
     this.controls.update();
+
 
     this._onResize = this._handleResize.bind(this);
     window.addEventListener("resize", this._onResize);
@@ -240,21 +268,21 @@ export class SceneManager {
   }
 
   update(delta) {
-    // Drone diam — hanya animasi baling-baling yang berputar
+    // Animasi baling-baling
     if (this.rotors) {
       this.rotors.forEach((r) => (r.rotation.y += delta * 30));
     }
 
-    // Update OrbitControls (wajib jika damping aktif)
+    // OrbitControls target ikuti posisi drone
     if (this.controls) {
+      this.controls.target.lerp(this.drone.position, 0.05);
       this.controls.update();
     }
 
-    // Animasi awan bergeser lambat tertiup angin
+    // Animasi awan
     if (this.clouds) {
       this.clouds.children.forEach((cloud) => {
         cloud.position.x += delta * 1.5;
-        // Reset posisi jika terlalu jauh agar awan terus muncul
         if (cloud.position.x > 120) {
           cloud.position.x = -120;
         }

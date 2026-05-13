@@ -1,0 +1,555 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* ============================
+   RESET
+   ============================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+canvas { display: block; }
+
+:root {
+  --cyan:      #00e5ff;
+  --cyan-dim:  rgba(0, 229, 255, 0.55);
+  --cyan-glow: rgba(0, 229, 255, 0.15);
+  --cyan-bg:   rgba(0, 229, 255, 0.07);
+  --green:     #00ff88;
+  --green-dim: rgba(0, 255, 136, 0.5);
+  --orange:    #ff9500;
+  --red:       #ff4444;
+  --bg-panel:  rgba(0, 8, 22, 0.82);
+  --bg-bar:    rgba(0, 6, 18, 0.90);
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-hud:  'Rajdhani', 'Share Tech Mono', sans-serif;
+}
+
+/* ============================
+   HUD ROOT
+   ============================ */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  font-family: var(--font-hud);
+  user-select: none;
+}
+
+/* ============================
+   ICON HELPERS
+   ============================ */
+.hud-icon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  vertical-align: middle;
+  margin-bottom: 1px;
+  opacity: 0.9;
+  filter: invert(1) brightness(1.5);
+}
+.hud-icon-arrival {
+  display: block;
+  width: 48px;
+  height: 48px;
+  filter: invert(1) brightness(1.4) sepia(1) saturate(4) hue-rotate(90deg)
+          drop-shadow(0 0 10px rgba(0,255,136,0.6));
+}
+.icon-cyan {
+  filter: invert(80%) sepia(80%) saturate(400%) hue-rotate(150deg) brightness(1.2);
+}
+.icon-green {
+  filter: invert(80%) sepia(80%) saturate(600%) hue-rotate(100deg) brightness(1.1);
+}
+
+/* ============================
+   TOP BAR
+   ============================ */
+#hud-bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 54px;
+  background: var(--bg-bar);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--cyan-dim);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.7), 0 1px 0 rgba(0,229,255,0.08) inset;
+}
+
+/* decorative dot-dash at bottom of bar */
+#hud-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--cyan-dim) 0px, var(--cyan-dim) 3px,
+    transparent 3px, transparent 7px
+  );
+}
+
+/* dot scan-line texture across bar */
+#hud-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,229,255,0.015) 3px,
+    rgba(0,229,255,0.015) 4px
+  );
+  pointer-events: none;
+}
+
+/* ============================
+   HUD SECTIONS
+   ============================ */
+#hud-left {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+#hud-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex: 1;
+  padding: 0 24px;
+}
+
+#hud-right {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(0,229,255,0.18);
+}
+
+/* ============================
+   MODULE (flight mode / status / camera)
+   ============================ */
+.hud-module {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 20px;
+  border-right: 1px solid rgba(0,229,255,0.18);
+  min-width: 130px;
+  position: relative;
+  gap: 1px;
+}
+
+.hud-module:first-child {
+  border-left: none;
+}
+
+.module-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  color: rgba(0, 229, 255, 0.5);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.module-value {
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 0 10px rgba(0,229,255,0.4);
+}
+
+.module-value img {
+  width: 15px;
+  height: 15px;
+  filter: invert(80%) sepia(80%) saturate(400%) hue-rotate(150deg) brightness(1.3);
+  opacity: 0.9;
+}
+
+/* Status variants */
+.module-value.status-arrived {
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(0,255,136,0.4);
+}
+.module-value.status-arrived img {
+  filter: invert(70%) sepia(80%) saturate(500%) hue-rotate(100deg) brightness(1.1);
+}
+.module-value.status-onpath {
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(0,255,136,0.3);
+}
+.module-value.status-onpath img {
+  filter: invert(70%) sepia(80%) saturate(500%) hue-rotate(100deg) brightness(1.1);
+}
+.module-value.status-warning {
+  color: var(--orange);
+  text-shadow: 0 0 10px rgba(255,149,0,0.4);
+}
+.module-value.status-warning img {
+  filter: invert(70%) sepia(80%) saturate(600%) hue-rotate(20deg) brightness(1.1);
+}
+.module-value.status-reset {
+  color: var(--red);
+  text-shadow: 0 0 10px rgba(255,68,68,0.4);
+  animation: pulse-reset 0.5s ease-in-out infinite alternate;
+}
+.module-value.manual-mode {
+  color: var(--orange);
+  text-shadow: 0 0 10px rgba(255,149,0,0.4);
+}
+.module-value.manual-mode img {
+  filter: invert(70%) sepia(80%) saturate(600%) hue-rotate(20deg) brightness(1.1);
+}
+
+@keyframes pulse-reset {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+
+/* ============================
+   CENTER TELEMETRY
+   ============================ */
+.telemetry-block {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  border-left: 1px solid rgba(0,229,255,0.15);
+  border-right: 1px solid rgba(0,229,255,0.15);
+}
+
+.telemetry-block span {
+  font-family: var(--font-hud);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(220, 245, 255, 0.92);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(0,229,255,0.2);
+}
+
+.telemetry-sep {
+  color: rgba(0,229,255,0.35) !important;
+  font-weight: 300 !important;
+  font-size: 16px !important;
+}
+
+/* ============================
+   FPS
+   ============================ */
+#fps-counter {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(0,229,255,0.65);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fps-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.fps-bar {
+  width: 4px;
+  background: var(--cyan-dim);
+  border-radius: 1px;
+}
+.fps-bar:nth-child(1) { height: 4px; }
+.fps-bar:nth-child(2) { height: 7px; }
+.fps-bar:nth-child(3) { height: 10px; }
+.fps-bar:nth-child(4) { height: 14px; }
+
+/* ============================
+   PANEL BASE (bottom panels)
+   ============================ */
+.hud-panel {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--bg-panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  padding: 14px 18px;
+  min-width: 210px;
+}
+
+/* corner L-brackets via pseudo-elements */
+.hud-panel::before,
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--cyan);
+  border-style: solid;
+}
+.hud-panel::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.hud-panel::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* extra corner accents top-right & bottom-left via box-shadow */
+.hud-panel {
+  box-shadow:
+    /* top-right corner */
+    inset calc(100% - 10px) 0 0 0 transparent,
+    /* glow */
+    0 4px 32px rgba(0,0,0,0.6),
+    0 0 0 0 transparent;
+  outline: none;
+}
+
+.panel-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--cyan-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,229,255,0.15);
+}
+
+/* ============================
+   NAVIGATION CONTROLS (bottom-left)
+   ============================ */
+#nav-controls-panel {
+  bottom: 24px;
+  left: 20px;
+}
+
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.ctrl-row:last-child { margin-bottom: 0; }
+
+.ctrl-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  filter: invert(80%) sepia(80%) saturate(400%) hue-rotate(150deg) brightness(1.1);
+  opacity: 0.75;
+}
+
+.ctrl-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cyan);
+  letter-spacing: 0.5px;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.ctrl-desc {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(200, 230, 255, 0.65);
+  letter-spacing: 0.3px;
+}
+
+/* ============================
+   MISSION STATUS (bottom-center)
+   ============================ */
+#mission-panel {
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  text-align: center;
+}
+
+.mission-drone-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 10px;
+  filter: invert(80%) sepia(80%) saturate(400%) hue-rotate(150deg) brightness(1.3)
+          drop-shadow(0 0 6px rgba(0,229,255,0.5));
+}
+
+.mission-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: rgba(0,229,255,0.5);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.mission-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.mission-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.mission-key {
+  font-family: var(--font-hud);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(200, 230, 255, 0.75);
+}
+
+.mission-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(0,229,255,0.4);
+}
+
+.mission-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,229,255,0.15);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: rgba(200,230,255,0.5);
+}
+
+.route-status-text {
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.route-status-text.active  { color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.4); }
+.route-status-text.idle    { color: rgba(200,230,255,0.45); }
+.route-status-text.warning { color: var(--orange); }
+
+.route-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--green);
+  background: rgba(0,255,136,0.2);
+  box-shadow: 0 0 6px rgba(0,255,136,0.4);
+  flex-shrink: 0;
+}
+.route-dot.idle    { border-color: rgba(200,230,255,0.3); background: transparent; box-shadow: none; }
+.route-dot.warning { border-color: var(--orange); background: rgba(255,149,0,0.15); box-shadow: 0 0 6px rgba(255,149,0,0.3); }
+
+/* ============================
+   CAMERA CONTROLS (bottom-right)
+   ============================ */
+#cam-controls-panel {
+  bottom: 24px;
+  right: 20px;
+  min-width: 230px;
+}
+
+/* ============================
+   ARRIVAL POPUP
+   ============================ */
+#arrival-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 60px;
+  background: rgba(0,10,24,0.92);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(0,255,136,0.45);
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 0 60px rgba(0,255,136,0.12), 0 0 120px rgba(0,229,255,0.06);
+}
+
+#arrival-popup.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+#arrival-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  background: rgba(0,255,136,0.07);
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,255,136,0.3);
+  box-shadow: 0 0 20px rgba(0,255,136,0.2);
+}
+
+#arrival-text {
+  font-family: var(--font-hud);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--green);
+  text-shadow: 0 0 20px rgba(0,255,136,0.35);
+}
+
+#arrival-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(0,255,136,0.5);
+  letter-spacing: 1px;
+}
+
+/* ============================
+   WAYPOINT INFO (hidden — merged into mission panel)
+   ============================ */
+#waypoint-info { display: none; }
+
+/* ============================
+   OLD CONTROLS GUIDE (hidden)
+   ============================ */
+#controls-guide { display: none; }
+
+/* ============================
+   PATHFINDING BUILT-IN HUD (hide old bar)
+   ============================ */
+#pathfinding-hud {
+  display: none !important;
+}
+

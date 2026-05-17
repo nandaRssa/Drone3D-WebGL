@@ -7,6 +7,8 @@ import {
   greedyPath,
 } from './helpers.js';
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 /**
  * PathfindingSystem.js v3 — Upgrade lengkap
  *
@@ -114,7 +116,7 @@ export class PathfindingSystem {
     if (!grid.isWalkable(ex, ez)) {
       const near = this._findNearestWalkable(ex, ez);
       if (!near) {
-        this._showToast('<img src="/icons/x.svg" class="hud-icon"> Target tidak terjangkau!', '#ff4444');
+        this._showToast(`<img src="${BASE}icons/x.svg" class="hud-icon"> Target tidak terjangkau!`, '#ff4444');
         if (this.onNoPath) this.onNoPath();
         return [];
       }
@@ -131,8 +133,8 @@ export class PathfindingSystem {
     }
 
     if (rawGridPath.length === 0) {
-      this._showToast('<img src="/icons/x.svg" class="hud-icon"> Tidak ada jalur ke tujuan!', '#ff4444');
-      this._updateHUDStatus('<img src="/icons/x.svg" class="hud-icon"> Tidak ada jalur');
+      this._showToast(`<img src="${BASE}icons/x.svg" class="hud-icon"> Tidak ada jalur ke tujuan!`, '#ff4444');
+      this._updateHUDStatus(`<img src="${BASE}icons/x.svg" class="hud-icon"> Tidak ada jalur`);
       if (this.onNoPath) this.onNoPath();
       return [];
     }
@@ -168,7 +170,7 @@ export class PathfindingSystem {
       this._clearPathVisual();
       this._clearWaypointMarkers();
       this._targetMarker.visible = false;
-      this._updateHUDStatus('<img src="/icons/mouse-left (1).svg" class="hud-icon"> Klik untuk set tujuan');
+      this._updateHUDStatus(`<img src="${BASE}icons/mouse-left (1).svg" class="hud-icon"> Klik untuk set tujuan`);
       return;
     }
 
@@ -199,12 +201,12 @@ export class PathfindingSystem {
 
       const totalWP = this._currentPath.length;
       const stops   = this._waypoints.length;
-      this._showToast(`<img src="/icons/check.svg" class="hud-icon"> ${stops} tujuan — ${totalWP} waypoints total`, '#00bfff');
+      this._showToast(`<img src="${BASE}icons/check.svg" class="hud-icon"> ${stops} tujuan — ${totalWP} waypoints total`, '#00bfff');
       this._updateHUDFull();
 
       if (this.onPathFound) this.onPathFound(this._currentPath);
     } else {
-      this._showToast('<img src="/icons/x.svg" class="hud-icon"> Tidak ada jalur!', '#ff4444');
+      this._showToast(`<img src="${BASE}icons/x.svg" class="hud-icon"> Tidak ada jalur!`, '#ff4444');
     }
   }
 
@@ -219,7 +221,7 @@ export class PathfindingSystem {
     }
     // Recalculate semua jalur yang ada
     if (this._waypoints.length > 0) {
-      this._showToast('<img src="/icons/rotate-ccw.svg" class="hud-icon"> Obstacle berubah — recalculate jalur...', '#ffaa00');
+      this._showToast(`<img src="${BASE}icons/rotate-ccw.svg" class="hud-icon"> Obstacle berubah — recalculate jalur...`, '#ffaa00');
       this._rebuildAllSegments();
     }
   }
@@ -232,7 +234,7 @@ export class PathfindingSystem {
     this._clearPathVisual();
     this._clearWaypointMarkers();
     this._targetMarker.visible = false;
-    this._updateHUDStatus('<img src="/icons/mouse-left (1).svg" class="hud-icon"> Klik untuk set tujuan');
+    this._updateHUDStatus(`<img src="${BASE}icons/mouse-left (1).svg" class="hud-icon"> Klik untuk set tujuan`);
   }
 
   getCurrentPath()    { return this._currentPath; }
@@ -259,7 +261,7 @@ export class PathfindingSystem {
 
     const { gx, gz } = this.grid.worldToGrid(hitPoint.x, hitPoint.z);
     if (!this.grid.inBounds(gx, gz)) {
-      this._showToast('<img src="/icons/triangle-alert.svg" class="hud-icon"> Klik di dalam area kota!', '#ffaa00');
+      this._showToast(`<img src="${BASE}icons/triangle-alert.svg" class="hud-icon"> Klik di dalam area kota!`, '#ffaa00');
       return false;
     }
 
@@ -269,7 +271,7 @@ export class PathfindingSystem {
 
     if (addToQueue) {
       this._waypoints.push({ gx, gz, world: worldTarget });
-      this._showToast(`<img src="/icons/navigation.svg" class="hud-icon"> Waypoint ${this._waypoints.length} ditambahkan`, '#00ffcc');
+      this._showToast(`<img src="${BASE}icons/navigation.svg" class="hud-icon"> Waypoint ${this._waypoints.length} ditambahkan`, '#00ffcc');
     } else {
       this._waypoints = [{ gx, gz, world: worldTarget }];
     }
@@ -283,7 +285,7 @@ export class PathfindingSystem {
     if (this._waypoints.length === 0) return;
     this._waypoints.pop();
     this._rebuildAllSegments();
-    this._showToast('<img src="/icons/undo-2.svg" class="hud-icon"> Waypoint terakhir dihapus', '#ffaa00');
+    this._showToast(`<img src="${BASE}icons/undo-2.svg" class="hud-icon"> Waypoint terakhir dihapus`, '#ffaa00');
   }
 
   /**
@@ -347,13 +349,13 @@ export class PathfindingSystem {
     // ESC = hapus semua waypoint
     if (e.key === 'Escape') {
       this.clearPath();
-      this._showToast('<img src="/icons/trash-2.svg" class="hud-icon"> Jalur dihapus', '#aaaaaa');
+      this._showToast(`<img src="${BASE}icons/trash-2.svg" class="hud-icon"> Jalur dihapus`, '#aaaaaa');
     }
     // Backspace = hapus waypoint terakhir
     if (e.key === 'Backspace' && this._waypoints.length > 0) {
       this._waypoints.pop();
       this._rebuildAllSegments();
-      this._showToast('<img src="/icons/undo-2.svg" class="hud-icon"> Waypoint terakhir dihapus', '#ffaa00');
+      this._showToast(`<img src="${BASE}icons/undo-2.svg" class="hud-icon"> Waypoint terakhir dihapus`, '#ffaa00');
     }
   }
 
@@ -370,7 +372,7 @@ export class PathfindingSystem {
 
     const { gx, gz } = this.grid.worldToGrid(hitPoint.x, hitPoint.z);
     if (!this.grid.inBounds(gx, gz)) {
-      this._showToast('<img src="/icons/triangle-alert.svg" class="hud-icon"> Klik di dalam area kota!', '#ffaa00');
+      this._showToast(`<img src="${BASE}icons/triangle-alert.svg" class="hud-icon"> Klik di dalam area kota!`, '#ffaa00');
       return;
     }
 
@@ -381,7 +383,7 @@ export class PathfindingSystem {
     if (addToQueue) {
       // ✅ Shift+klik → tambah ke antrian
       this._waypoints.push({ gx, gz, world: worldTarget });
-      this._showToast(`<img src="/icons/navigation.svg" class="hud-icon"> Waypoint ${this._waypoints.length} ditambahkan`, '#00ffcc');
+      this._showToast(`<img src="${BASE}icons/navigation.svg" class="hud-icon"> Waypoint ${this._waypoints.length} ditambahkan`, '#00ffcc');
     } else {
       // Klik biasa → ganti semua tujuan
       this._waypoints = [{ gx, gz, world: worldTarget }];
@@ -696,7 +698,7 @@ export class PathfindingSystem {
 
     hud.innerHTML = `
       <div id="pf-controls" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-        <span id="pf-hint"><img src="/icons/mouse-left (1).svg" class="hud-icon"> Klik = set tujuan &nbsp;|&nbsp; Shift+Klik = tambah waypoint &nbsp;|&nbsp; ESC = reset &nbsp;|&nbsp; Backspace = hapus terakhir</span>
+        <span id="pf-hint"><img src="${BASE}icons/mouse-left (1).svg" class="hud-icon"> Klik = set tujuan &nbsp;|&nbsp; Shift+Klik = tambah waypoint &nbsp;|&nbsp; ESC = reset &nbsp;|&nbsp; Backspace = hapus terakhir</span>
       </div>
       <div id="pf-status"></div>
       <div id="pf-waypoints" style="display:none"></div>
@@ -753,11 +755,11 @@ export class PathfindingSystem {
     const wpEl   = document.getElementById('pf-waypoints');
 
     if (status) {
-      status.innerHTML = `<img src="/icons/plane.svg" class="hud-icon"> ${this._waypoints.length} tujuan — ${this._currentPath.length} waypoints total`;
+      status.innerHTML = `<img src="${BASE}icons/plane.svg" class="hud-icon"> ${this._waypoints.length} tujuan — ${this._currentPath.length} waypoints total`;
       status.style.color = '#00ffcc';
     }
     if (wpEl && this._waypoints.length > 1) {
-      wpEl.innerHTML = '<img src="/icons/navigation.svg" class="hud-icon"> ' + this._waypoints.map((_, i) => `Stop ${i + 1}`).join(' → ');
+      wpEl.innerHTML = `<img src="${BASE}icons/navigation.svg" class="hud-icon"> ` + this._waypoints.map((_, i) => `Stop ${i + 1}`).join(' → ');
       wpEl.style.display = 'block';
     } else if (wpEl) {
       wpEl.style.display = 'none';

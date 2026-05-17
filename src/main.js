@@ -7,6 +7,8 @@ import { InputSystem } from './systems/InputSystem.js';
 import { NavigationSystem } from './systems/NavigationSystem.js';
 import { FPVCameraController } from './systems/FPVCameraController.js';
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 const world = new SceneManager({
   gridCols: 20,
   gridRows: 20,
@@ -70,21 +72,21 @@ hud.innerHTML = `
       <div class="hud-module">
         <div class="module-label">Flight Mode</div>
         <div class="module-value" id="badge-mode">
-          <img src="/icons/plane.svg"> AUTO PILOT
+          <img src="${BASE}icons/plane.svg"> AUTO PILOT
         </div>
       </div>
       <!-- Status -->
       <div class="hud-module">
         <div class="module-label">Status</div>
         <div class="module-value" id="badge-nav">
-          <img src="/icons/navigation.svg"> ON PATH
+          <img src="${BASE}icons/navigation.svg"> ON PATH
         </div>
       </div>
       <!-- Camera Mode -->
       <div class="hud-module">
         <div class="module-label">Camera</div>
         <div class="module-value" id="badge-camera">
-          <img src="/icons/camera.svg"> THIRD PERSON
+          <img src="${BASE}icons/camera.svg"> THIRD PERSON
         </div>
       </div>
     </div>
@@ -119,22 +121,22 @@ hud.innerHTML = `
   <div class="hud-panel" id="nav-controls-panel">
     <div class="panel-header">Navigation Controls</div>
     <div class="ctrl-row">
-      <img src="/icons/mouse-left (1).svg" class="ctrl-icon">
+      <img src="${BASE}icons/mouse-left (1).svg" class="ctrl-icon">
       <span class="ctrl-key">LMB</span>
       <span class="ctrl-desc">Set Target</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/mouse.svg" class="ctrl-icon">
+      <img src="${BASE}icons/mouse.svg" class="ctrl-icon">
       <span class="ctrl-key">SHIFT + LMB</span>
       <span class="ctrl-desc">Add Waypoint</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/undo-2.svg" class="ctrl-icon">
+      <img src="${BASE}icons/undo-2.svg" class="ctrl-icon">
       <span class="ctrl-key">BACKSPACE</span>
       <span class="ctrl-desc">Remove Last</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/x.svg" class="ctrl-icon">
+      <img src="${BASE}icons/x.svg" class="ctrl-icon">
       <span class="ctrl-key">ESC</span>
       <span class="ctrl-desc">Reset Route</span>
     </div>
@@ -142,7 +144,7 @@ hud.innerHTML = `
 
   <!-- BOTTOM CENTER: MISSION STATUS -->
   <div class="hud-panel" id="mission-panel">
-    <img src="/icons/plane.svg" class="mission-drone-icon">
+    <img src="${BASE}icons/plane.svg" class="mission-drone-icon">
     <div class="mission-title">Mission Status</div>
     <div class="mission-stats">
       <div class="mission-row">
@@ -165,22 +167,22 @@ hud.innerHTML = `
   <div class="hud-panel" id="cam-controls-panel">
     <div class="panel-header">Camera Controls</div>
     <div class="ctrl-row">
-      <img src="/icons/mouse.svg" class="ctrl-icon">
+      <img src="${BASE}icons/mouse.svg" class="ctrl-icon">
       <span class="ctrl-key">DRAG</span>
       <span class="ctrl-desc">Rotate Camera</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/mouse.svg" class="ctrl-icon">
+      <img src="${BASE}icons/mouse.svg" class="ctrl-icon">
       <span class="ctrl-key">SCROLL</span>
       <span class="ctrl-desc">Zoom In / Out</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/camera.svg" class="ctrl-icon">
+      <img src="${BASE}icons/camera.svg" class="ctrl-icon">
       <span class="ctrl-key">C</span>
       <span class="ctrl-desc">Switch Camera</span>
     </div>
     <div class="ctrl-row">
-      <img src="/icons/plane.svg" class="ctrl-icon">
+      <img src="${BASE}icons/plane.svg" class="ctrl-icon">
       <span class="ctrl-key">M</span>
       <span class="ctrl-desc">Toggle Mode</span>
     </div>
@@ -188,7 +190,7 @@ hud.innerHTML = `
 
   <!-- ARRIVAL POPUP -->
   <div id="arrival-popup">
-    <div id="arrival-icon"><img src="/icons/target.svg" class="hud-icon-arrival"></div>
+    <div id="arrival-icon"><img src="${BASE}icons/target.svg" class="hud-icon-arrival"></div>
     <div id="arrival-text">Tujuan Tercapai!</div>
     <div id="arrival-sub">Drone telah sampai di tujuan</div>
   </div>
@@ -241,11 +243,11 @@ pathfinding.onNoPath = () => {
 // ========== MODE TOGGLE ==========
 input._onModeChange = (newMode) => {
   if (newMode === 'AUTO') {
-    badgeMode.innerHTML = '<img src="/icons/plane.svg"> AUTO PILOT';
+    badgeMode.innerHTML = `<img src="${BASE}icons/plane.svg"> AUTO PILOT`;
     badgeMode.className = 'module-value';
     movement.setPath(pathfinding.getCurrentPath());
   } else {
-    badgeMode.innerHTML = '<img src="/icons/plane.svg"> MANUAL';
+    badgeMode.innerHTML = `<img src="${BASE}icons/plane.svg"> MANUAL`;
     badgeMode.className = 'module-value manual-mode';
     movement.clearPath();
   }
@@ -254,15 +256,15 @@ input._onModeChange = (newMode) => {
 // ========== NAVIGATION CALLBACKS ==========
 navigation.onStatusChange = (status) => {
   if (status === 'ON_PATH') {
-    badgeNav.innerHTML = '<img src="/icons/navigation.svg"> ON PATH';
+    badgeNav.innerHTML = `<img src="${BASE}icons/navigation.svg"> ON PATH`;
     badgeNav.className = 'module-value status-onpath';
     setRouteStatus('active');
   } else if (status === 'WARNING') {
-    badgeNav.innerHTML = '<img src="/icons/triangle-alert.svg"> WARNING';
+    badgeNav.innerHTML = `<img src="${BASE}icons/triangle-alert.svg"> WARNING`;
     badgeNav.className = 'module-value status-warning';
     setRouteStatus('warning');
   } else {
-    badgeNav.innerHTML = '<img src="/icons/x.svg"> RESET';
+    badgeNav.innerHTML = `<img src="${BASE}icons/x.svg"> RESET`;
     badgeNav.className = 'module-value status-reset';
     setRouteStatus('idle');
   }
@@ -276,7 +278,7 @@ navigation.onReset = () => {
 // ========== MOVEMENT CALLBACKS ==========
 movement.onArrived = () => {
   arrivalPopup.classList.add('show');
-  badgeNav.innerHTML = '<img src="/icons/check.svg"> ARRIVED';
+  badgeNav.innerHTML = `<img src="${BASE}icons/check.svg"> ARRIVED`;
   badgeNav.className = 'module-value status-arrived';
   setRouteStatus('idle');
   setTimeout(() => arrivalPopup.classList.remove('show'), 3500);
@@ -284,7 +286,7 @@ movement.onArrived = () => {
 
 movement.onStateChange = (state) => {
   if (state === 'MOVING') {
-    badgeNav.innerHTML = '<img src="/icons/navigation.svg"> ON PATH';
+    badgeNav.innerHTML = `<img src="${BASE}icons/navigation.svg"> ON PATH`;
     badgeNav.className = 'module-value status-onpath';
     setRouteStatus('active');
   }
@@ -294,9 +296,9 @@ movement.onStateChange = (state) => {
 input._onCameraToggle = () => {
   cameraController.toggleMode();
   if (cameraController.mode === 'FPV') {
-    badgeCamera.innerHTML = '<img src="/icons/camera.svg"> FPV';
+    badgeCamera.innerHTML = `<img src="${BASE}icons/camera.svg"> FPV`;
   } else {
-    badgeCamera.innerHTML = '<img src="/icons/camera.svg"> THIRD PERSON';
+    badgeCamera.innerHTML = `<img src="${BASE}icons/camera.svg"> THIRD PERSON`;
   }
 };
 
@@ -346,7 +348,7 @@ function animate(time) {
         if (!window._manualArrived) {
           window._manualArrived = true;
           arrivalPopup.classList.add('show');
-          badgeNav.innerHTML = '<img src="/icons/check.svg"> ARRIVED';
+          badgeNav.innerHTML = `<img src="${BASE}icons/check.svg"> ARRIVED`;
           badgeNav.className = 'module-value status-arrived';
           setRouteStatus('idle');
           setTimeout(() => arrivalPopup.classList.remove('show'), 3500);

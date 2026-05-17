@@ -88,7 +88,7 @@ export class SceneManager {
     this.controls.rotateSpeed  = 0.8;
 
     this.controls.enableDamping = true;
-    this.controls.dampingFactor  = 0.08;
+    this.controls.dampingFactor  = 0.3;
 
     this.controls.screenSpacePanning = true;
 
@@ -275,7 +275,12 @@ export class SceneManager {
 
     // OrbitControls target ikuti posisi drone
     if (this.controls) {
-      this.controls.target.lerp(this.drone.position, 0.05);
+      const dist = this.controls.target.distanceTo(this.drone.position);
+      if (dist > 0.1) {
+        this.controls.target.lerp(this.drone.position, 0.2);
+      } else {
+        this.controls.target.copy(this.drone.position);
+      }
       this.controls.update();
     }
 

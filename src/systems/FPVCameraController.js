@@ -54,9 +54,9 @@ export class FPVCameraController {
     // SMOOTHING
     // =====================================
 
-    this.lerpSpeed = 0.1;
+    this.lerpSpeed = 0.25;
 
-    this.slerpSpeed = 0.08;
+    this.slerpSpeed = 0.2;
 
     // =====================================
     // TARGETS

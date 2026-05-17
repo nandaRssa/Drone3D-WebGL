@@ -329,10 +329,11 @@ function animate(time) {
   const delta = Math.min((time - lastTime) / 1000, 0.1);
   lastTime = time;
 
-  cameraController.update(delta);
+  cameraController.preUpdate(delta);
   pathfinding.update(delta);
   movement.update(delta);
   world.update(delta);
+  cameraController.update(delta);
 
   const pos = world.drone.position;
 

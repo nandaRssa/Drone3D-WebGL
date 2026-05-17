@@ -93,7 +93,7 @@ export class SceneManager {
     this.controls.screenSpacePanning = true;
 
     this.controls.minDistance = 3;
-    this.controls.maxDistance = 500;
+    this.controls.maxDistance = 1000;
 
     this.controls.minPolarAngle = 0;
     this.controls.maxPolarAngle = Math.PI;
